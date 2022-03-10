@@ -1,0 +1,15 @@
+apiVersion: kpack.io/v1alpha2
+kind: Image
+metadata:
+  name: $(workload.metadata.name)$
+  labels:
+    app.kubernetes.io/part-of: $(workload.metadata.name)$
+spec:
+  tag: <repository_name>/$(workload.metadata.name)$
+  serviceAccount: default
+  builder:
+    kind: ClusterBuilder
+    name: default
+  source:
+    blob:
+      url: $(source.url)$
