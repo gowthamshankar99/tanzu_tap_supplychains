@@ -1,4 +1,46 @@
 apiVersion: carto.run/v1alpha1
+kind: ClusterSourceTemplate
+metadata:
+    name: workload-git-repository
+spec:
+  urlPath: .status.artifact.url
+  revisionPath: .status.artifact.revision
+  template:
+    apiVersion: source.toolkit.fluxcd.io/v1beta1
+    kind: GitRepository
+    metadata:
+        name: $(workload.metadata.name)$
+        labels:
+          app.kubernetes.io/part-of: $(workload.metadata.name)$
+    spec:
+      interval: 1m
+      url: $(workload.spec.source.git.url)$
+      ref: $(workload.spec.source.git.ref)$
+---
+apiVersion: carto.run/v1alpha1
+kind: ClusterImageTemplate
+metadata:
+   name: workload-kpack-image
+spec:
+  imagePath: .status.latestImage
+  template:
+    apiVersion: kpack.io/v1alpha2
+    kind: Image
+    metadata:
+      name: $(workload.metadata.name)$
+      labels:
+        app.kubernetes.io/part-of: $(workload.metadata.name)$
+    spec:
+      tag: gowthamshankar9/$(workload.metadata.name)$
+      serviceAccount: default
+      builder:
+        kind: ClusterBuilder
+        name: default
+      source:
+        blob:
+          url: $(source.url)$
+---
+apiVersion: carto.run/v1alpha1
 kind: ClusterTemplate
 metadata:
   name: knative-deployer
